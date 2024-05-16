@@ -143,16 +143,28 @@ If desired you may deploy API Gateway with your own TLS key and cert. The Templa
 
 ```bash
 helm upgrade -i -f myvalues.yaml --set ingress.tls.key="$(<key.pem)" --set ingress.tls.cert="$(<cert.pem)"
-
 ```
+
+## Examples for Use-cases
+
+Sub-folder `examples` contains some *values* examples for more use-cases. To use the use-case, adapt and add the provided `values.yaml` to your values.
+
+| Use-case | Description |
+|-----|------|
+| [fluentd-sidecar](../examples/fluentd-sidecar/README.md) | Running API Gateway with Fluentd Sidecar |
+| [house-keeping-job](../examples/house-keeping-job/README.md) | Example to create house keeping job: purge transaction events  |
+
 ## Version History
 
 | Version | Changes and Description |
 |-----|------|
 | `1.0.0` | Initial release |
 | `1.1.0` | Bug fixes in default values and helper functions for elastic secret names. <br> **Attention:** moved elasticsearch secret keys: <br>elasticSecretName --> elasticsearch.secretName<br>elasticSecretUserKey --> elasticsearch.secretUserKey<br>elasticSecretPasswordKey --> elasticsearch.secretPasswordKey |
-| `1.2.0` | Added Kibana TLS/SSL functionality towards Elasticsearch. Helper function aded for kibana truststore password.
-| `1.2.1` | Added Kibana configuration field 'status.allowAnonymous' set by Values.kibana.allowAnonymousStatus. This removes errors in API Gateway log indicating that Kibana is not available.
+| `1.2.0` | Added Kibana TLS/SSL functionality towards Elasticsearch. Helper function aded for kibana truststore password. |
+| `1.2.1` | Added Kibana configuration field 'status.allowAnonymous' set by Values.kibana.allowAnonymousStatus. This removes errors in API Gateway log indicating that Kibana is not available. |
+| `1.2.2` | Option in `values.yaml` to create a ServiceMonitor added. |
+| `1.2.3` | Job template added to create house keeping (cron) jobs.  |
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -343,14 +355,11 @@ helm upgrade -i -f myvalues.yaml --set ingress.tls.key="$(<key.pem)" --set ingre
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |
 | podSecurityContext | object | `{}` |  |
+| prometheus | object | `{"interval":"10s","path":"/metrics","port":"5555","scheme":"http","scrape":"true","scrapeTimeout":"10s"}` | Define values for Prometheus Operator to scrap metrics via annotation or ServiceMonitor. |
 | prometheus-elasticsearch-exporter | object | `{"enabled":true,"es":{"uri":"http://$(ES_USER):$(ES_PASSWORD)@apigw-apigateway-es-http:9200"},"extraEnvSecrets":{"ES_PASSWORD":{"key":"password","secret":"apigw-apigateway-sag-user-es"},"ES_USER":{"key":"username","secret":"apigw-apigateway-sag-user-es"}},"podAnnotations":{"prometheus.io/path":"/metrics","prometheus.io/port":"9108","prometheus.io/scheme":"http","prometheus.io/scrape":"true"},"serviceMonitor":{"enabled":false}}` | Elasticsearch exporter settings. See https://github.com/prometheus-community/elasticsearch_exporter for details. |
 | prometheus-elasticsearch-exporter.enabled | bool | `true` | Deploy the prometheus exporter for elasticsearch |
 | prometheus-elasticsearch-exporter.es.uri | string | `"http://$(ES_USER):$(ES_PASSWORD)@apigw-apigateway-es-http:9200"` | The uri of the elasticsearch service. By default this is null and the environment variable ES_URI is used instead. Overwrite this if you are using an external Elasticsearch instance |
 | prometheus-elasticsearch-exporter.extraEnvSecrets | object | `{"ES_PASSWORD":{"key":"password","secret":"apigw-apigateway-sag-user-es"},"ES_USER":{"key":"username","secret":"apigw-apigateway-sag-user-es"}}` | secret for elasticsearch user. Will need to adjust the secret's name. By default the secret name is <releasename>-apigateway-sag-user-es. Adjust accordingly if your release name is different.  |
-| prometheus.path | string | `"/metrics"` |  |
-| prometheus.port | string | `"5555"` |  |
-| prometheus.scheme | string | `"http"` |  |
-| prometheus.scrape | string | `"true"` |  |
 | replicaCount | int | `1` |  |
 | resources.apigwContainer.limits.cpu | int | `8` |  |
 | resources.apigwContainer.limits.memory | string | `"8Gi"` |  |
@@ -368,4 +377,5 @@ helm upgrade -i -f myvalues.yaml --set ingress.tls.key="$(<key.pem)" --set ingre
 | serviceAccount.create | bool | `true` | - apiVersion: rbac.authorization.k8s.io/v1 kind: Role metadata:   name: {{ include "common.names.roleName" . }} rules: - apiGroups:   - ""   resources:   - pods   - endpoints   verbs:   - get   - list   - watch |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | serviceAccount.roleName | string | `""` |  |
+| serviceMonitor | object | `{"enabled":false}` | Create and enable ServiceMonitor. The default is `false`. |
 | tolerations | list | `[]` |  |

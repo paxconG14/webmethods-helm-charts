@@ -16,13 +16,14 @@ Sub-folder `examples` contains some *values* examples for more use-cases. To use
 | Use-case | Description |
 |-----|------|
 | [mws-postgresql](../examples/postgresql/README.md) | Using MWS with external PostgreSQL database |
+| [service-auditing-monitor](../examples/service-auditing-monitor/README.md) | Using MWS as Service Auditing Monitor |
 
 ## Install MyWebMethods Server Release
 
 Install release with pulling image and setting secret (to pull image) ...
 
 ```shell
-helm install wm-mws microservicesruntime
+helm install wm-mws mywebmethodsserver
 ```
 
 ... define default domain name of Ingress service host ...
@@ -38,5 +39,12 @@ helm install wm-mws microservicesruntime
   --set "ingress.hosts[0].paths[0].pathType=Prefix"   \
   --set "ingress.hosts[0].paths[0].port=5555"
 ```
+
+## Version History
+
+| Version | Changes and Description |
+|-----|------|
+| `1.0.0` | Initial release |
+| `1.0.1` | CRD `ServiceMonitor` added |
 
 {{ template "chart.valuesSection" . }}
